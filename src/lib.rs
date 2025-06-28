@@ -1,4 +1,5 @@
 use ndarray::Array2;
+use std::fmt::{Display, Formatter, Error};
 
 #[derive(Debug)]
 pub enum EleType {
@@ -9,6 +10,7 @@ pub enum EleType {
     EleTypeSext,
     EleTypeOct,
     EleTypeMult,
+    EleTypeCav,
 }
 
 #[derive(Debug)]
@@ -16,7 +18,41 @@ pub struct Element {
     name: String,
     length: f64,
     k: [f64; 4],
+    _voltage: f64,
+    _harmonic: f64,
+    _lag: f64,
     r_matrix: Array2<f64>,
+}
+
+impl Display for Element {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
+        match element_type(self) {
+            EleType::EleTypeMarker => {
+                write!(f, "Marker: {name}", name=self.name)
+            }
+            EleType::EleTypeDrift => {
+                write!(f, "Drift: {name}", name=self.name)
+            }
+            EleType::EleTypeBend => {
+                write!(f, "Bend: {name}", name=self.name)
+            }
+            EleType::EleTypeQuad => {
+                write!(f, "Quad: {name}", name=self.name)
+            }
+            EleType::EleTypeSext => {
+                write!(f, "Sext: {name}", name=self.name)
+            }
+            EleType::EleTypeOct => {
+                write!(f, "Oct: {name}", name=self.name)
+            }
+            EleType::EleTypeMult => {
+                write!(f, "Mult: {name}", name=self.name)
+            }
+            EleType::EleTypeCav => {
+                write!(f, "RFCav: {name}", name=self.name)
+            }
+        }
+    }
 }
 
 impl Default for Element {
@@ -25,13 +61,18 @@ impl Default for Element {
             name: "".to_string(),
             length: 0.0,
             k: [0.0; 4],
+            _voltage: 0.0,
+            _harmonic: 0.0,
+            _lag: 0.0,
             r_matrix: Array2::eye(6),
         }
     }
 }
 
 pub fn element_type(ele: &Element) -> EleType {
-    if ele.length == 0.0 {
+    if ele._voltage != 0.0 || ele._harmonic != 0.0 || ele._lag != 0.0 {
+        return EleType::EleTypeCav
+    } else if ele.length == 0.0 {
         return EleType::EleTypeMarker;
     } else if ele.k[0] == 0.0 && ele.k[1] == 0.0 && ele.k[2] == 0.0 && ele.k[3] == 0.0 {
         return EleType::EleTypeDrift;
@@ -198,14 +239,3 @@ pub fn get_line_matrix(line: &[Element]) -> Array2<f64> {
     return retval;
 }
 
-fn main() {
-    let q1 = make_quad("quad".to_string(), 1.1, -0.5);
-    let d1 = make_drift("drift".to_string(), 2.0);
-    let m1 = make_marker("marker".to_string());
-    let s1 = make_sbend("sext".to_string(), 2.1, 0.1, 0.0);
-
-    let line = [d1, q1, m1, s1];
-    let line_matrix = get_line_matrix(&line);
-
-    println!("{line_matrix:?}");
-}
