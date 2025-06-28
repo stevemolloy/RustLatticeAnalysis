@@ -12,4 +12,3 @@ fn test_line_matrix() {
 
     println!("{line_matrix:?}");
 }
-

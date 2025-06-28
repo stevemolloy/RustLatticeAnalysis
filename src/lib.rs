@@ -1,5 +1,5 @@
 use ndarray::Array2;
-use std::fmt::{Display, Formatter, Error};
+use std::fmt::{Display, Error, Formatter};
 
 #[derive(Debug)]
 pub enum EleType {
@@ -28,28 +28,28 @@ impl Display for Element {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
         match element_type(self) {
             EleType::EleTypeMarker => {
-                write!(f, "Marker: {name}", name=self.name)
+                write!(f, "Marker: {name}", name = self.name)
             }
             EleType::EleTypeDrift => {
-                write!(f, "Drift: {name}", name=self.name)
+                write!(f, "Drift: {name}", name = self.name)
             }
             EleType::EleTypeBend => {
-                write!(f, "Bend: {name}", name=self.name)
+                write!(f, "Bend: {name}", name = self.name)
             }
             EleType::EleTypeQuad => {
-                write!(f, "Quad: {name}", name=self.name)
+                write!(f, "Quad: {name}", name = self.name)
             }
             EleType::EleTypeSext => {
-                write!(f, "Sext: {name}", name=self.name)
+                write!(f, "Sext: {name}", name = self.name)
             }
             EleType::EleTypeOct => {
-                write!(f, "Oct: {name}", name=self.name)
+                write!(f, "Oct: {name}", name = self.name)
             }
             EleType::EleTypeMult => {
-                write!(f, "Mult: {name}", name=self.name)
+                write!(f, "Mult: {name}", name = self.name)
             }
             EleType::EleTypeCav => {
-                write!(f, "RFCav: {name}", name=self.name)
+                write!(f, "RFCav: {name}", name = self.name)
             }
         }
     }
@@ -71,7 +71,7 @@ impl Default for Element {
 
 pub fn element_type(ele: &Element) -> EleType {
     if ele._voltage != 0.0 || ele._harmonic != 0.0 || ele._lag != 0.0 {
-        return EleType::EleTypeCav
+        return EleType::EleTypeCav;
     } else if ele.length == 0.0 {
         return EleType::EleTypeMarker;
     } else if ele.k[0] == 0.0 && ele.k[1] == 0.0 && ele.k[2] == 0.0 && ele.k[3] == 0.0 {
@@ -238,4 +238,3 @@ pub fn get_line_matrix(line: &[Element]) -> Array2<f64> {
 
     return retval;
 }
-
