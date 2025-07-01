@@ -2,12 +2,12 @@ use std::fs::File;
 use std::io::{BufReader, Read};
 use std::process::exit;
 
-use winnow::combinator::{alt, delimited, separated};
+use winnow::combinator::{alt, delimited, opt, separated};
 use winnow::token::literal;
 use winnow::token::{take_till, take_while};
 use winnow::{Parser, Result};
 
-use crate::element::Element;
+// use crate::element::Element;
 
 #[derive(Debug, PartialEq)]
 pub enum Statement<'a> {
@@ -17,7 +17,7 @@ pub enum Statement<'a> {
     Use(&'a str),
 }
 
-pub fn parse_lattice_from_tracy_file(file_path: &str) -> Result<Vec<Element>, ()> {
+pub fn parse_lattice_from_tracy_file(file_path: &str) {
     let f = File::open(file_path).unwrap_or_else(|err| {
         eprintln!("ERROR: Could not open {file_path}: {err}");
         exit(1);
@@ -32,11 +32,10 @@ pub fn parse_lattice_from_tracy_file(file_path: &str) -> Result<Vec<Element>, ()
             exit(1);
         });
 
-    todo!();
-}
-
-pub fn do_nothing_parser<'a>(_input: &mut &'a str) -> Result<&'a str> {
-    Ok("")
+    let parsed_data = parse_tracy_file(&file_contents);
+    for line in parsed_data.iter() {
+        println!("{line:?}");
+    }
 }
 
 pub fn optional_whitespace<'a>(input: &mut &'a str) -> Result<&'a str> {
@@ -44,7 +43,7 @@ pub fn optional_whitespace<'a>(input: &mut &'a str) -> Result<&'a str> {
 }
 
 pub fn symbol<'a>(input: &mut &'a str) -> Result<&'a str> {
-    take_while(1.., |c: char| c.is_alphanumeric() || c == '_').parse_next(input)
+    take_while(1.., |c: char| c.is_alphanumeric() || c == '_' || c == '-').parse_next(input)
 }
 
 pub fn use_instruction<'a>(input: &mut &'a str) -> Result<&'a str> {
@@ -70,11 +69,7 @@ pub fn variable_assignment<'a>(input: &mut &'a str) -> Result<(&'a str, &'a str)
 }
 
 pub fn variable_assignment_statement<'a>(input: &mut &'a str) -> Result<(&'a str, &'a str)> {
-    (
-        variable_assignment,
-        optional_whitespace,
-        literal(";")
-    )
+    (variable_assignment, optional_whitespace, literal(";"))
         .map(|(assign, _, _)| assign)
         .parse_next(input)
 }
@@ -89,16 +84,23 @@ pub fn element_creation<'a>(
         optional_whitespace,
         symbol,
         optional_whitespace,
-        literal(","),
-        optional_whitespace,
-        separated(
-            0..,
-            variable_assignment,
-            delimited(optional_whitespace, literal(","), optional_whitespace),
-        ),
+        opt((
+            literal(","),
+            optional_whitespace,
+            separated(
+                0..,
+                variable_assignment,
+                delimited(optional_whitespace, literal(","), optional_whitespace),
+            ),
+        )),
         literal(";"),
     )
-        .map(|(sym, _, _, _, typ, _, _, _, fields, _)| (sym, typ, fields))
+        .map(|(sym, _, _, _, typ, _, fields_opt, _)| {
+            let fields = fields_opt
+                .map(|(_, _, fields)| fields)
+                .unwrap_or_else(Vec::new);
+            (sym, typ, fields)
+        })
         .parse_next(input)
 }
 
@@ -116,7 +118,7 @@ pub fn line_creation<'a>(input: &mut &'a str) -> Result<(&'a str, Vec<&'a str>)>
             "(",
             separated(
                 0..,
-                symbol,
+                delimited(optional_whitespace, symbol, optional_whitespace),
                 delimited(optional_whitespace, literal(","), optional_whitespace),
             ),
             ")",
@@ -135,4 +137,25 @@ pub fn parse_statement<'a>(input: &mut &'a str) -> Result<Statement<'a>> {
         variable_assignment_statement.map(|(var, expr)| Statement::Assignment(var, expr)),
     ))
     .parse_next(input)
+}
+
+pub fn parse_tracy_file(input: &str) -> Vec<Statement> {
+    let mut remaining = input;
+    let mut statements = Vec::new();
+
+    while !remaining.trim_start().is_empty() {
+        remaining = remaining.trim_start();
+
+        match parse_statement(&mut remaining) {
+            Ok(statement) => {
+                statements.push(statement);
+            }
+            Err(_err) => {
+                eprintln!("ERROR: Could not parse.  Remaining = \"{remaining}\"");
+                break;
+            }
+        }
+    }
+
+    statements
 }

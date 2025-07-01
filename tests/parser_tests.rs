@@ -1,16 +1,6 @@
 use rust_lattice_analysis::*;
 
 #[test]
-fn test_nothing_parser() {
-    let mut input = "Hello world";
-
-    let output = do_nothing_parser(&mut input);
-
-    assert_eq!(input, "Hello world");
-    assert_eq!(output, Ok(""));
-}
-
-#[test]
 fn test_use_instruction() {
     let mut input = "USE: line_to_use;";
 
@@ -53,6 +43,11 @@ fn test_variable_assignment() {
 
 #[test]
 fn test_element_creation() {
+    let mut input = "begin: Marker;";
+    let output = element_creation(&mut input);
+    assert_eq!(input, "");
+    assert_eq!(output, Ok(("begin", "Marker", vec![])));
+
     let mut input = "d8:  Drift, L = 0.125 - 0.1;";
     let output = element_creation(&mut input);
     assert_eq!(input, "");
@@ -140,4 +135,69 @@ fn test_parse_statement() {
     let output = parse_statement(&mut input);
     assert_eq!(input, "");
     assert_eq!(output, Ok(Statement::Assignment("C", "528.0/20.0")));
+}
+
+#[test]
+fn test_parse_tracy_file() {
+    use Statement::*;
+
+    let mut input = r#"h_rf = 176;
+    C    = 528.0/20.0;
+    
+    
+    cav: Cavity, Frequency = c0/C*h_rf, Voltage = 2*1.50e6, HarNum = h_rf,
+         Phi = 0.0;
+    
+    d1:  Drift, L = 0.01;
+    d2:  Drift, L = 0.30311 - 0.1;
+    d3:  Drift, L = 0.40311 - 0.30311;
+
+         sp: LINE = (begin, sup_per, cav);
+    
+    USE: sp;
+    "#;
+    let output = parse_tracy_file(&mut input);
+    assert_eq!(
+        output,
+        vec![
+            Assignment("h_rf", "176"),
+            Assignment("C", "528.0/20.0"),
+            Element(
+                "cav",
+                "Cavity",
+                vec![
+                    ("Frequency", "c0/C*h_rf"),
+                    ("Voltage", "2*1.50e6"),
+                    ("HarNum", "h_rf"),
+                    ("Phi", "0.0")
+                ]
+            ),
+            Element("d1", "Drift", vec![("L", "0.01")]),
+            Element("d2", "Drift", vec![("L", "0.30311 - 0.1")]),
+            Element("d3", "Drift", vec![("L", "0.40311 - 0.30311")]),
+            Line("sp", vec!["begin", "sup_per", "cav"]),
+            Use("sp"),
+        ]
+    );
+}
+
+#[test]
+fn test_line_parsing_weirdness() {
+    let mut input = "m_cell: LINE = (
+	  s2, d5, d4, q3, twk, ge, d6, gs, s1, d7, bpm, d8, ch, cv, d9, o3,
+	  -b_mc, d10, q2, d11, o2, d12, q1, d12, o1, d13, ch, cv, d14, bpm, ge,
+	  d15);";
+    let output = line_creation(&mut input);
+    assert_eq!(input, "");
+    assert_eq!(
+        output,
+        Ok((
+            "m_cell",
+            vec![
+                "s2", "d5", "d4", "q3", "twk", "ge", "d6", "gs", "s1", "d7", "bpm", "d8", "ch",
+                "cv", "d9", "o3", "-b_mc", "d10", "q2", "d11", "o2", "d12", "q1", "d12", "o1",
+                "d13", "ch", "cv", "d14", "bpm", "ge", "d15"
+            ]
+        ))
+    );
 }
