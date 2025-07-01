@@ -238,4 +238,3 @@ pub fn get_line_matrix(line: &[Element]) -> Array2<f64> {
 
     return retval;
 }
-
