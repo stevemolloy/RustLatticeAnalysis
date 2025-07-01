@@ -75,7 +75,9 @@ fn test_element_creation_parser() {
         ))
     );
 
-    let mut input = "cav: Cavity, Frequency = c0/C*h_rf, Voltage = 2*1.50e6, HarNum = h_rf,\n     Phi = 0.0;";
+    let mut input = r#"cav: Cavity, Frequency = c0/C*h_rf, Voltage = 2*1.50e6, HarNum = h_rf,
+
+                                      Phi = 0.0;"#;
     let output = element_creation_parser(&mut input);
     assert_eq!(input, "");
     assert_eq!(output, Ok(("cav", "Cavity", vec![
