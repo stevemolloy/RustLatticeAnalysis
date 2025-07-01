@@ -1,73 +1,12 @@
 use std::fs::File;
 use std::io::{BufReader, Read};
 use std::process::exit;
-use lexical::parse_partial;
+
+use winnow::token::literal;
+use winnow::token::take_while;
+use winnow::{Parser, Result};
 
 use crate::element::Element;
-
-pub enum Token {
-  SYMBOL(String),
-  NUMBER(f64),
-  ASSIGNMENT,
-  ADD,
-  MULT,
-  SUB,
-  DIV,
-  OPAREN,
-  CPAREN,
-  SEMICOLON,
-  COLON,
-  COMMA,
-}
-
-pub struct Lexer<'a> {
-    chars: &'a[u8]
-}
-
-impl Lexer<'_> {
-    pub fn get_next_token(&mut self) -> Option<Token> {
-        while !self.chars.is_empty() && self.chars[0].is_ascii_whitespace() {
-            self.chars = &self.chars[1..];
-        }
-        if self.chars.is_empty() {
-            return None;
-        }
-
-        if self.chars[0] == b'=' {
-            self.chars = &self.chars[1..];
-            return Some(Token::ASSIGNMENT);
-        } else if self.chars[0] == b'+' {
-            self.chars = &self.chars[1..];
-            return Some(Token::ADD);
-        } else if self.chars[0] == b'*' {
-            self.chars = &self.chars[1..];
-            return Some(Token::MULT);
-        } else if self.chars[0] == b'-' {
-            self.chars = &self.chars[1..];
-            return Some(Token::SUB);
-        } else if self.chars[0] == b'/' {
-            self.chars = &self.chars[1..];
-            return Some(Token::DIV);
-        } else if self.chars[0] == b'(' {
-            self.chars = &self.chars[1..];
-            return Some(Token::OPAREN);
-        } else if self.chars[0] == b')' {
-            self.chars = &self.chars[1..];
-            return Some(Token::CPAREN);
-        } else if self.chars[0] == b';' {
-            self.chars = &self.chars[1..];
-            return Some(Token::SEMICOLON);
-        } else if self.chars[0] == b':' {
-            self.chars = &self.chars[1..];
-            return Some(Token::COLON);
-        } else if self.chars[0] == b',' {
-            self.chars = &self.chars[1..];
-            return Some(Token::COMMA);
-        }
-
-        todo!();
-    }
-}
 
 pub fn parse_lattice_from_tracy_file(file_path: &str) -> Result<Vec<Element>, ()> {
     let f = File::open(file_path).unwrap_or_else(|err| {
@@ -84,13 +23,25 @@ pub fn parse_lattice_from_tracy_file(file_path: &str) -> Result<Vec<Element>, ()
             exit(1);
         });
 
-    let lexer: Lexer = Lexer {chars: file_contents.as_bytes()};
-
-    if let Ok((partial_match, n)) = parse_partial::<f64,_>(lexer.chars) {
-        println!("{partial_match}, {n} characters");
-    } else {
-        println!("No match found.  No float here.");
-    }
-
     todo!();
+}
+
+pub fn do_nothing_parser<'a>(_input: &mut &'a str) -> Result<&'a str> {
+    Ok("")
+}
+
+pub fn parse_symbol<'a>(input: &mut &'a str) -> Result<&'a str> {
+    take_while(1.., |c: char| c.is_alphanumeric() || c == '_').parse_next(input)
+}
+
+pub fn use_line_parser<'a>(input: &mut &'a str) -> Result<&'a str> {
+    (
+        literal("USE"),
+        literal(":"),
+        take_while(1.., char::is_whitespace),
+        parse_symbol,
+        literal(";"),
+    )
+        .map(|(_, _, _, sym, _)| sym)
+        .parse_next(input)
 }

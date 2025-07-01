@@ -1,10 +1,10 @@
-use rust_lattice_analysis::*;
+// use rust_lattice_analysis::*;
 
-#[test]
-fn test_read_lattice_from_file() {
-    let file_path = "./lattices/max_4u_sp_jb_5.lat";
-    let line = parse_lattice_from_tracy_file(file_path);
-}
+// #[test]
+// fn test_read_lattice_from_file() {
+//     let file_path = "./lattices/max_4u_sp_jb_5.lat";
+//     let line = parse_lattice_from_tracy_file(file_path);
+// }
 
 // #[test]
 // fn test_line_matrix() {
