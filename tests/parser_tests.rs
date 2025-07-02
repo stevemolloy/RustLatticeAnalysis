@@ -53,7 +53,10 @@ fn test_element_creation() {
     let mut input = "d8:  Drift, L = 0.125 - 0.1;";
     let output = element_creation(&mut input);
     assert_eq!(input, "");
-    assert_eq!(output, Ok(("d8", "Drift", HashMap::from([("L", "0.125 - 0.1")]))));
+    assert_eq!(
+        output,
+        Ok(("d8", "Drift", HashMap::from([("L", "0.125 - 0.1")])))
+    );
 
     let mut input = "q1   : Quadrupole, L = 0.25000, Phi =  0.00000, B_2 =  4.79596, N = n_quad;";
     let output = element_creation(&mut input);
@@ -87,8 +90,8 @@ fn test_element_creation() {
                 ("Voltage", "2*1.50e6"),
                 ("HarNum", "h_rf"),
                 ("Phi", "0.0"),
-            ]
-        )))
+            ])
+        ))
     );
 }
 
