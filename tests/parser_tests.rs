@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use rust_lattice_analysis::*;
 
 #[test]
@@ -46,12 +48,12 @@ fn test_element_creation() {
     let mut input = "begin: Marker;";
     let output = element_creation(&mut input);
     assert_eq!(input, "");
-    assert_eq!(output, Ok(("begin", "Marker", vec![])));
+    assert_eq!(output, Ok(("begin", "Marker", HashMap::new())));
 
     let mut input = "d8:  Drift, L = 0.125 - 0.1;";
     let output = element_creation(&mut input);
     assert_eq!(input, "");
-    assert_eq!(output, Ok(("d8", "Drift", vec![("L", "0.125 - 0.1")])));
+    assert_eq!(output, Ok(("d8", "Drift", HashMap::from([("L", "0.125 - 0.1")]))));
 
     let mut input = "q1   : Quadrupole, L = 0.25000, Phi =  0.00000, B_2 =  4.79596, N = n_quad;";
     let output = element_creation(&mut input);
@@ -61,12 +63,12 @@ fn test_element_creation() {
         Ok((
             "q1",
             "Quadrupole",
-            vec![
+            HashMap::from([
                 ("L", "0.25000"),
                 ("Phi", "0.00000"),
                 ("B_2", "4.79596"),
                 ("N", "n_quad")
-            ]
+            ])
         ))
     );
 
@@ -80,13 +82,13 @@ fn test_element_creation() {
         Ok((
             "cav",
             "Cavity",
-            vec![
+            HashMap::from([
                 ("Frequency", "c0/C*h_rf"),
                 ("Voltage", "2*1.50e6"),
                 ("HarNum", "h_rf"),
                 ("Phi", "0.0"),
             ]
-        ))
+        )))
     );
 }
 
@@ -122,7 +124,7 @@ fn test_parse_statement() {
         Ok(Statement::Element(
             "s1",
             "Sextupole",
-            vec![("L", "0.1"), ("B_3", "-1.24426e+02"), ("N", "n_sext")]
+            HashMap::from([("L", "0.1"), ("B_3", "-1.24426e+02"), ("N", "n_sext")])
         ))
     );
 
@@ -165,16 +167,16 @@ fn test_parse_tracy_file() {
             Element(
                 "cav",
                 "Cavity",
-                vec![
+                HashMap::from([
                     ("Frequency", "c0/C*h_rf"),
                     ("Voltage", "2*1.50e6"),
                     ("HarNum", "h_rf"),
                     ("Phi", "0.0")
-                ]
+                ])
             ),
-            Element("d1", "Drift", vec![("L", "0.01")]),
-            Element("d2", "Drift", vec![("L", "0.30311 - 0.1")]),
-            Element("d3", "Drift", vec![("L", "0.40311 - 0.30311")]),
+            Element("d1", "Drift", HashMap::from([("L", "0.01")])),
+            Element("d2", "Drift", HashMap::from([("L", "0.30311 - 0.1")])),
+            Element("d3", "Drift", HashMap::from([("L", "0.40311 - 0.30311")])),
             Line("sp", vec!["begin", "sup_per", "cav"]),
             Use("sp"),
         ]
