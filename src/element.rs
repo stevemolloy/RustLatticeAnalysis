@@ -18,6 +18,7 @@ pub struct Element {
     name: String,
     length: f64,
     k: [f64; 4],
+    _frequency: f64,
     _voltage: f64,
     _harmonic: f64,
     _lag: f64,
@@ -61,6 +62,7 @@ impl Default for Element {
             name: "".to_string(),
             length: 0.0,
             k: [0.0; 4],
+            _frequency: 0.0,
             _voltage: 0.0,
             _harmonic: 0.0,
             _lag: 0.0,
@@ -104,6 +106,55 @@ pub fn make_drift(name: String, length: f64) -> Element {
         name,
         length,
         r_matrix,
+        ..Default::default()
+    }
+}
+
+pub fn make_cavity(
+    name: String,
+    length: f64,
+    freq: f64,
+    voltage: f64,
+    phase: f64,
+    harmonic: f64,
+) -> Element {
+    let mut r_matrix = Array2::eye(6);
+    r_matrix[[0, 1]] = length;
+    r_matrix[[2, 3]] = length;
+    Element {
+        name,
+        length,
+        r_matrix,
+        _frequency: freq,
+        _harmonic: harmonic,
+        _voltage: voltage,
+        _lag: phase,
+        ..Default::default()
+    }
+}
+
+pub fn make_sext(name: String, length: f64, k2: f64) -> Element {
+    let mut r_matrix = Array2::eye(6);
+    r_matrix[[0, 1]] = length;
+    r_matrix[[2, 3]] = length;
+    Element {
+        name,
+        length,
+        r_matrix,
+        k: [0.0, 0.0, k2, 0.0],
+        ..Default::default()
+    }
+}
+
+pub fn make_oct(name: String, length: f64, k3: f64) -> Element {
+    let mut r_matrix = Array2::eye(6);
+    r_matrix[[0, 1]] = length;
+    r_matrix[[2, 3]] = length;
+    Element {
+        name,
+        length,
+        r_matrix,
+        k: [0.0, 0.0, 0.0, k3],
         ..Default::default()
     }
 }

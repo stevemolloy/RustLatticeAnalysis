@@ -9,9 +9,7 @@ use winnow::token::literal;
 use winnow::token::{take_till, take_while};
 use winnow::{Parser, Result};
 
-use crate::{make_drift, make_marker, make_quad, make_sbend};
-
-// use crate::element::Element;
+use crate::{make_cavity, make_drift, make_marker, make_oct, make_quad, make_sbend, make_sext};
 
 #[derive(Debug, PartialEq)]
 pub enum Statement<'a> {
@@ -68,66 +66,74 @@ pub fn parse_lattice_from_tracy_file(file_path: &str) {
             _ => {}
         }
     }
-    println!("{vars:?}");
 
     let mut eles = HashMap::new();
     for line in parsed_data.iter() {
         match line {
-            Element(name, typ, params) => {
-                match *typ {
-                    "Drift" => {
-                        let length = evaluate_expr(params["L"], &vars).unwrap();
-                        eles.insert(name, make_drift((*name).to_string(), length));
-                    }
-                    "Cavity" => {
-                        // let harnum = evaluate_expr(params["HarNum"], &vars).unwrap();
-                        // let voltage = evaluate_expr(params["Voltage"], &vars).unwrap();
-                        // let freq = evaluate_expr(params["Frequency"], &vars).unwrap();
-                        // let phi = evaluate_expr(params["Phi"], &vars).unwrap();
-                        eles.insert(name, make_drift((*name).to_string(), 0.0));
-                    }
-                    "Quadrupole" => {
-                        let length = evaluate_expr(params["L"], &vars).unwrap();
-                        let phi = evaluate_expr(params["Phi"], &vars).unwrap();
-                        if phi != 0.0 {
-                            eprintln!("ERROR: Cannot yet deal with skew quads");
-                            exit(1);
-                        }
-                        let b_2 = evaluate_expr(params["B_2"], &vars).unwrap();
-                        eles.insert(name, make_quad((*name).to_string(), length, b_2));
-                    }
-                    "Bending" => {
-                        let length =
-                            evaluate_expr(params.get("L").unwrap_or(&"0.0"), &vars).unwrap();
-                        let b_2 =
-                            evaluate_expr(params.get("B_2").unwrap_or(&"0.0"), &vars).unwrap();
-                        let angle =
-                            evaluate_expr(params.get("Phi").unwrap_or(&"0.0"), &vars).unwrap();
-                        eles.insert(name, make_sbend((*name).to_string(), length, angle, b_2));
-                    }
-                    "Sextupole" => {
-                        let length = evaluate_expr(params["L"], &vars).unwrap();
-                        // let b_3 = evaluate_expr(params["B_3"], &vars).unwrap();
-                        eles.insert(name, make_drift((*name).to_string(), length));
-                    }
-                    "Octupole" => {
-                        let length = evaluate_expr(params["L"], &vars).unwrap();
-                        // let b_4 = evaluate_expr(params["B_4"], &vars).unwrap();
-                        eles.insert(name, make_drift((*name).to_string(), length));
-                    }
-                    "Marker" => {
-                        eles.insert(name, make_marker((*name).to_string()));
-                    }
-                    &_ => todo!(),
+            Element(name, typ, params) => match *typ {
+                "Drift" => {
+                    let length = evaluate_expr(params.get("L").unwrap_or(&"0.0"), &vars).unwrap();
+                    eles.insert(name, make_drift((*name).to_string(), length));
                 }
-            }
+                "Cavity" => {
+                    let length = evaluate_expr(params.get("L").unwrap_or(&"0.0"), &vars).unwrap();
+                    let harnum =
+                        evaluate_expr(params.get("HarNum").unwrap_or(&"0.0"), &vars).unwrap();
+                    let voltage =
+                        evaluate_expr(params.get("Voltage").unwrap_or(&"0.0"), &vars).unwrap();
+                    let freq =
+                        evaluate_expr(params.get("Frequency").unwrap_or(&"0.0"), &vars).unwrap();
+                    let phi = evaluate_expr(params.get("Phi").unwrap_or(&"0.0"), &vars).unwrap();
+                    eles.insert(
+                        name,
+                        make_cavity((*name).to_string(), length, freq, voltage, phi, harnum),
+                    );
+                }
+                "Quadrupole" => {
+                    let length = evaluate_expr(params.get("L").unwrap_or(&"0.0"), &vars).unwrap();
+                    let phi = evaluate_expr(params.get("Phi").unwrap_or(&"0.0"), &vars).unwrap();
+                    if phi != 0.0 {
+                        eprintln!("ERROR: Cannot yet deal with skew quads");
+                        exit(1);
+                    }
+                    let b_2 = evaluate_expr(params.get("B_2").unwrap_or(&"0.0"), &vars).unwrap();
+                    eles.insert(name, make_quad((*name).to_string(), length, b_2));
+                }
+                "Bending" => {
+                    let length = evaluate_expr(params.get("L").unwrap_or(&"0.0"), &vars).unwrap();
+                    let b_2 = evaluate_expr(params.get("B_2").unwrap_or(&"0.0"), &vars).unwrap();
+                    let angle = evaluate_expr(params.get("Phi").unwrap_or(&"0.0"), &vars).unwrap();
+                    eles.insert(name, make_sbend((*name).to_string(), length, angle, b_2));
+                }
+                "Sextupole" => {
+                    let length = evaluate_expr(params.get("L").unwrap_or(&"0.0"), &vars).unwrap();
+                    let b_3 = evaluate_expr(params.get("B_3").unwrap_or(&"0.0"), &vars).unwrap();
+                    eles.insert(name, make_sext((*name).to_string(), length, b_3));
+                }
+                "Octupole" => {
+                    let length = evaluate_expr(params.get("L").unwrap_or(&"0.0"), &vars).unwrap();
+                    let b_4 = evaluate_expr(params.get("B_4").unwrap_or(&"0.0"), &vars).unwrap();
+                    eles.insert(name, make_oct((*name).to_string(), length, b_4));
+                }
+                "Marker" => {
+                    eles.insert(name, make_marker((*name).to_string()));
+                }
+                &_ => todo!(),
+            },
             _ => {}
         }
     }
     for line in parsed_data.iter() {
         match line {
-            Line(name, eles) => {
-                println!("{name} --> {eles:?}");
+            Line(name, eles_in_line) => {
+                println!("Lattice: {name}:");
+                for ele in eles_in_line.iter() {
+                    if (*ele)[0] == '-'  {
+                        println!("\t{element}", element = eles[ele[1..]]);
+                    } else {
+                        println!("\t{element}", element = eles[ele]);
+                    }
+                }
             }
             _ => {}
         }
