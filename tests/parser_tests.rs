@@ -206,3 +206,35 @@ fn test_line_parsing_weirdness() {
         ))
     );
 }
+
+#[test]
+fn test_parse_lattice_from_tracy_file() {
+    let filename = "lattices/max_4u_sp_jb_5.lat";
+    let ele_names = vec![
+        "begin", "d15", "ge", "bpm", "d14", "cv", "ch", "d13", "o1", "d12", "q1", "d12", "o2",
+        "d11", "q2", "d10", "d1_u6", "d1_u5", "d1_u4", "d1_u3", "d1_u2", "d1_u1", "d1_0", "d1_d1",
+        "d1_d2", "d1_d3", "d1_d4", "d1_d5", "o3", "d9", "cv", "ch", "d8", "bpm", "d7", "s1", "gs",
+        "d6", "ge", "twk", "q3", "d4", "d5", "s2", "s3", "d5", "bpm", "d4", "r1", "d3", "cv", "ch",
+        "d2", "s4", "d1", "d2_5", "d2_4", "d2_3", "d2_2", "d2_1", "d2_0", "d2_0", "d2_1", "d2_2",
+        "d2_3", "d2_4", "d2_5", "d1", "s4", "ge", "d2", "gs", "d_corr", "d_corr", "d3", "r1", "d4",
+        "d5", "s3", "s3", "d5", "bpm", "d4", "r1", "d3", "cv", "ch", "d2", "s4", "d1", "d2_5",
+        "d2_4", "d2_3", "d2_2", "d2_1", "d2_0", "d2_0", "d2_1", "d2_2", "d2_3", "d2_4", "d2_5",
+        "d1", "s4", "ge", "d2", "gs", "d_corr", "d_corr", "d3", "r1", "d4", "d5", "s3", "s3", "d5",
+        "bpm", "d4", "r1", "d3", "cv", "ch", "d2", "s4", "d1", "d2_5", "d2_4", "d2_3", "d2_2",
+        "d2_1", "d2_0", "d2_0", "d2_1", "d2_2", "d2_3", "d2_4", "d2_5", "d1", "s4", "d2", "ch",
+        "cv", "d3", "r1", "d4", "bpm", "d5", "s3", "s3", "d5", "d4", "r1", "d3", "d_corr",
+        "d_corr", "gs", "d2", "ge", "s4", "d1", "d2_5", "d2_4", "d2_3", "d2_2", "d2_1", "d2_0",
+        "d2_0", "d2_1", "d2_2", "d2_3", "d2_4", "d2_5", "d1", "s4", "d2", "ch", "cv", "d3", "r1",
+        "d4", "bpm", "d5", "s3", "s3", "d5", "d4", "r1", "d3", "d_corr", "d_corr", "gs", "d2",
+        "ge", "s4", "d1", "d2_5", "d2_4", "d2_3", "d2_2", "d2_1", "d2_0", "d2_0", "d2_1", "d2_2",
+        "d2_3", "d2_4", "d2_5", "d1", "s4", "d2", "ch", "cv", "d3", "r1", "d4", "bpm", "d5", "s3",
+        "s2", "d5", "d4", "q3", "twk", "ge", "d6", "gs", "s1", "d7", "bpm", "d8", "ch", "cv", "d9",
+        "o3", "d1_d5", "d1_d4", "d1_d3", "d1_d2", "d1_d1", "d1_0", "d1_u1", "d1_u2", "d1_u3",
+        "d1_u4", "d1_u5", "d1_u6", "d10", "q2", "d11", "o2", "d12", "q1", "d12", "o1", "d13", "ch",
+        "cv", "d14", "bpm", "ge", "d15", "cav",
+    ];
+    let line = parse_lattice_from_tracy_file(filename).unwrap();
+    for (ele, name) in line.iter().zip(ele_names) {
+        assert_eq!(name, ele.name);
+    }
+}

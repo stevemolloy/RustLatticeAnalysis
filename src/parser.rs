@@ -33,7 +33,7 @@ fn evaluate_expr(expr: &str, vars: &HashMap<&str, f64>) -> Result<f64, EvalexprE
     }
 }
 
-pub fn parse_lattice_from_tracy_file(file_path: &str) {
+pub fn parse_lattice_from_tracy_file(file_path: &str) -> Result<Vec<crate::Element>, ()> {
     use Statement::*;
 
     let f = File::open(file_path).unwrap_or_else(|err| {
@@ -149,13 +149,16 @@ pub fn parse_lattice_from_tracy_file(file_path: &str) {
             Use(name) => {
                 println!("Found a USE statement with the name: {name}");
                 if !line_dictionary.contains_key(name) {
-                    println!("\tThis name does NOT exist in the dictionary");
+                    eprintln!("\tThis name does NOT exist in the dictionary");
+                    exit(1);
                 } else {
-                    println!("\tThis name DOES exist in the dictionary");
+                    let retval = line_dictionary.remove(name).unwrap(); // line_dictionary[name];
+                    return Ok(retval);
                 }
             }
         }
     }
+    unreachable!("Should never get here!");
 }
 
 pub fn optional_whitespace<'a>(input: &mut &'a str) -> Result<&'a str> {
