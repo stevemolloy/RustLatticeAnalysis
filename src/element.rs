@@ -13,7 +13,7 @@ pub enum EleType {
     EleTypeCav,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Element {
     name: String,
     length: f64,
