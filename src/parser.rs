@@ -67,13 +67,13 @@ pub fn parse_lattice_from_tracy_file(file_path: &str) {
         }
     }
 
-    let mut eles = HashMap::new();
+    let mut element_dictionary: HashMap<&str, crate::Element> = HashMap::new();
     for line in parsed_data.iter() {
         match line {
             Element(name, typ, params) => match *typ {
                 "Drift" => {
                     let length = evaluate_expr(params.get("L").unwrap_or(&"0.0"), &vars).unwrap();
-                    eles.insert(name, make_drift((*name).to_string(), length));
+                    element_dictionary.insert(name, make_drift((*name).to_string(), length));
                 }
                 "Cavity" => {
                     let length = evaluate_expr(params.get("L").unwrap_or(&"0.0"), &vars).unwrap();
@@ -84,7 +84,7 @@ pub fn parse_lattice_from_tracy_file(file_path: &str) {
                     let freq =
                         evaluate_expr(params.get("Frequency").unwrap_or(&"0.0"), &vars).unwrap();
                     let phi = evaluate_expr(params.get("Phi").unwrap_or(&"0.0"), &vars).unwrap();
-                    eles.insert(
+                    element_dictionary.insert(
                         name,
                         make_cavity((*name).to_string(), length, freq, voltage, phi, harnum),
                     );
@@ -97,42 +97,73 @@ pub fn parse_lattice_from_tracy_file(file_path: &str) {
                         exit(1);
                     }
                     let b_2 = evaluate_expr(params.get("B_2").unwrap_or(&"0.0"), &vars).unwrap();
-                    eles.insert(name, make_quad((*name).to_string(), length, b_2));
+                    element_dictionary.insert(name, make_quad((*name).to_string(), length, b_2));
                 }
                 "Bending" => {
                     let length = evaluate_expr(params.get("L").unwrap_or(&"0.0"), &vars).unwrap();
                     let b_2 = evaluate_expr(params.get("B_2").unwrap_or(&"0.0"), &vars).unwrap();
                     let angle = evaluate_expr(params.get("Phi").unwrap_or(&"0.0"), &vars).unwrap();
-                    eles.insert(name, make_sbend((*name).to_string(), length, angle, b_2));
+                    element_dictionary
+                        .insert(name, make_sbend((*name).to_string(), length, angle, b_2));
                 }
                 "Sextupole" => {
                     let length = evaluate_expr(params.get("L").unwrap_or(&"0.0"), &vars).unwrap();
                     let b_3 = evaluate_expr(params.get("B_3").unwrap_or(&"0.0"), &vars).unwrap();
-                    eles.insert(name, make_sext((*name).to_string(), length, b_3));
+                    element_dictionary.insert(name, make_sext((*name).to_string(), length, b_3));
                 }
                 "Octupole" => {
                     let length = evaluate_expr(params.get("L").unwrap_or(&"0.0"), &vars).unwrap();
                     let b_4 = evaluate_expr(params.get("B_4").unwrap_or(&"0.0"), &vars).unwrap();
-                    eles.insert(name, make_oct((*name).to_string(), length, b_4));
+                    element_dictionary.insert(name, make_oct((*name).to_string(), length, b_4));
                 }
                 "Marker" => {
-                    eles.insert(name, make_marker((*name).to_string()));
+                    element_dictionary.insert(name, make_marker((*name).to_string()));
                 }
                 &_ => todo!(),
             },
             _ => {}
         }
     }
+
+    let mut line_dictionary: HashMap<&str, Vec<crate::Element>> = HashMap::new();
     for line in parsed_data.iter() {
         match line {
             Line(name, eles_in_line) => {
-                println!("Lattice: {name}:");
-                for ele in eles_in_line.iter() {
-                    if (*ele)[0] == '-'  {
-                        println!("\t{element}", element = eles[ele[1..]]);
+                let mut new_line: Vec<crate::Element> = Vec::new();
+                let mut rev_line: bool;
+                for item in eles_in_line.iter() {
+                    let search_str = if item.chars().nth(0).unwrap() == '-' {
+                        rev_line = true;
+                        &item[1..]
                     } else {
-                        println!("\t{element}", element = eles[ele]);
+                        rev_line = false;
+                        &item
+                    };
+                    if element_dictionary.contains_key(search_str) {
+                        new_line.push(element_dictionary[search_str].clone());
+                    } else if line_dictionary.contains_key(search_str) {
+                        if rev_line {
+                            for e in line_dictionary[search_str].iter().rev() {
+                                new_line.push(e.clone());
+                            }
+                        } else {
+                            for e in line_dictionary[search_str].iter() {
+                                new_line.push(e.clone());
+                            }
+                        }
+                    } else {
+                        eprintln!("ERROR: Could not find the element {search_str}");
+                        exit(1);
                     }
+                }
+                line_dictionary.insert(name, new_line);
+            }
+            Use(name) => {
+                println!("Found a USE statement with the name: {name}");
+                if !line_dictionary.contains_key(name) {
+                    println!("\tThis name does NOT exist in the dictionary");
+                } else {
+                    println!("\tThis name DOES exist in the dictionary");
                 }
             }
             _ => {}
