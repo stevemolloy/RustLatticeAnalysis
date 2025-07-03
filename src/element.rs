@@ -15,14 +15,14 @@ pub enum EleType {
 
 #[derive(Debug, Clone)]
 pub struct Element {
-    name: String,
-    length: f64,
-    k: [f64; 4],
-    _frequency: f64,
-    _voltage: f64,
-    _harmonic: f64,
-    _lag: f64,
-    r_matrix: Array2<f64>,
+    pub name: String,
+    pub length: f64,
+    pub k: [f64; 4],
+    pub _frequency: f64,
+    pub _voltage: f64,
+    pub _harmonic: f64,
+    pub _lag: f64,
+    pub r_matrix: Array2<f64>,
 }
 
 impl Display for Element {
