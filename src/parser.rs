@@ -52,24 +52,19 @@ pub fn parse_lattice_from_tracy_file(file_path: &str) {
 
     let parsed_data = parse_tracy_file(&file_contents);
     let mut vars = HashMap::new();
+    let mut element_dictionary: HashMap<&str, crate::Element> = HashMap::new();
+    let mut line_dictionary: HashMap<&str, Vec<crate::Element>> = HashMap::new();
     for line in parsed_data.iter() {
         match line {
             Assignment(var, expr) => {
                 match evaluate_expr(expr, &vars) {
                     Ok(result) => vars.insert(var, result),
                     Err(e) => {
-                        eprintln!("ERROR: {}", e);
+                        eprintln!("ERROR: {e}");
                         exit(1);
                     }
                 };
             }
-            _ => {}
-        }
-    }
-
-    let mut element_dictionary: HashMap<&str, crate::Element> = HashMap::new();
-    for line in parsed_data.iter() {
-        match line {
             Element(name, typ, params) => match *typ {
                 "Drift" => {
                     let length = evaluate_expr(params.get("L").unwrap_or(&"0.0"), &vars).unwrap();
@@ -121,23 +116,16 @@ pub fn parse_lattice_from_tracy_file(file_path: &str) {
                 }
                 &_ => todo!(),
             },
-            _ => {}
-        }
-    }
-
-    let mut line_dictionary: HashMap<&str, Vec<crate::Element>> = HashMap::new();
-    for line in parsed_data.iter() {
-        match line {
             Line(name, eles_in_line) => {
                 let mut new_line: Vec<crate::Element> = Vec::new();
                 let mut rev_line: bool;
                 for item in eles_in_line.iter() {
-                    let search_str = if item.chars().nth(0).unwrap() == '-' {
+                    let search_str = if let Some(stripped) = item.strip_prefix('-') {
                         rev_line = true;
-                        &item[1..]
+                        stripped
                     } else {
                         rev_line = false;
-                        &item
+                        item
                     };
                     if element_dictionary.contains_key(search_str) {
                         new_line.push(element_dictionary[search_str].clone());
@@ -166,7 +154,6 @@ pub fn parse_lattice_from_tracy_file(file_path: &str) {
                     println!("\tThis name DOES exist in the dictionary");
                 }
             }
-            _ => {}
         }
     }
 }

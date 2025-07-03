@@ -73,21 +73,21 @@ impl Default for Element {
 
 pub fn element_type(ele: &Element) -> EleType {
     if ele._voltage != 0.0 || ele._harmonic != 0.0 || ele._lag != 0.0 {
-        return EleType::EleTypeCav;
+        EleType::EleTypeCav
     } else if ele.length == 0.0 {
-        return EleType::EleTypeMarker;
+        EleType::EleTypeMarker
     } else if ele.k[0] == 0.0 && ele.k[1] == 0.0 && ele.k[2] == 0.0 && ele.k[3] == 0.0 {
-        return EleType::EleTypeDrift;
+        EleType::EleTypeDrift
     } else if ele.k[0] != 0.0 && ele.k[2] == 0.0 && ele.k[3] == 0.0 {
-        return EleType::EleTypeBend;
+        EleType::EleTypeBend
     } else if ele.k[0] == 0.0 && ele.k[1] != 0.0 && ele.k[2] == 0.0 && ele.k[3] == 0.0 {
-        return EleType::EleTypeQuad;
+        EleType::EleTypeQuad
     } else if ele.k[0] == 0.0 && ele.k[1] == 0.0 && ele.k[2] != 0.0 && ele.k[3] == 0.0 {
-        return EleType::EleTypeSext;
+        EleType::EleTypeSext
     } else if ele.k[0] == 0.0 && ele.k[1] == 0.0 && ele.k[2] == 0.0 && ele.k[3] != 0.0 {
-        return EleType::EleTypeOct;
+        EleType::EleTypeOct
     } else {
-        return EleType::EleTypeMult;
+        EleType::EleTypeMult
     }
 }
 
@@ -287,5 +287,5 @@ pub fn get_line_matrix(line: &[Element]) -> Array2<f64> {
         retval = retval.dot(&ele.r_matrix);
     }
 
-    return retval;
+    retval
 }
