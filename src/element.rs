@@ -292,7 +292,7 @@ pub fn get_line_matrix(line: &[Element]) -> Array2<f64> {
 
 pub fn apply_matrix_n_times(matrix: &Array2<f64>, n: usize) -> Array2<f64> {
     let mut result = Array2::eye(6);
-    
+
     for _ in 0..n {
         result = result.dot(matrix);
     }
