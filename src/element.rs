@@ -290,10 +290,10 @@ pub fn get_line_matrix(line: &[Element]) -> Array2<f64> {
     retval
 }
 
-pub fn print_matrix(matrix: Array2<f64>) {
+pub fn print_matrix(matrix: &Array2<f64>) {
     for row in matrix.outer_iter() {
         for item in row {
-            print!("{item:+0.6e} ");
+            print!("  {item:+0.6e}");
         }
         println!();
     }
