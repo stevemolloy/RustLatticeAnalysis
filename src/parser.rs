@@ -160,7 +160,6 @@ pub fn parse_lattice_from_tracy_file(file_path: &str) -> Result<Vec<crate::Eleme
                 line_dictionary.insert(name, new_line);
             }
             Use(name) => {
-                println!("Found a USE statement with the name: {name}");
                 if !line_dictionary.contains_key(name) {
                     eprintln!("\tThis name does NOT exist in the dictionary");
                     return Err(ParseError);
