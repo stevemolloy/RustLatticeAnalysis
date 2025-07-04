@@ -247,7 +247,7 @@ pub fn make_sbend(name: String, length: f64, angle: f64, k1: f64) -> Element {
     } else {
         r_matrix[[0, 0]] = omega_x_l.cosh();
         r_matrix[[0, 1]] = omega_x_l.sinh() / omega_x;
-        r_matrix[[1, 0]] = omega_x_l.sinh() * (-omega_x);
+        r_matrix[[1, 0]] = omega_x_l.sinh() * (omega_x);
         r_matrix[[1, 1]] = omega_x_l.cosh();
         r_matrix[[0, 5]] = (h / omega_x_sqr) * (1.0 - omega_x_l.cosh());
         r_matrix[[1, 5]] = (h / omega_x) * omega_x_l.sinh();
@@ -259,7 +259,7 @@ pub fn make_sbend(name: String, length: f64, angle: f64, k1: f64) -> Element {
     if omega_y_sqr == 0.0 {
         r_matrix[[0, 1]] = length;
         r_matrix[[4, 0]] = h * length;
-    } else if omega_y_sqr > 0.0 {
+    } else if omega_y_sqr < 0.0 {
         r_matrix[[2, 2]] = omega_y_l.cos();
         r_matrix[[2, 3]] = omega_y_l.sin() / omega_y;
         r_matrix[[3, 2]] = omega_y_l.sin() * (-omega_y);
@@ -267,7 +267,7 @@ pub fn make_sbend(name: String, length: f64, angle: f64, k1: f64) -> Element {
     } else {
         r_matrix[[2, 2]] = omega_y_l.cosh();
         r_matrix[[2, 3]] = omega_y_l.sinh() / omega_y;
-        r_matrix[[3, 2]] = omega_y_l.sinh() * (-omega_y);
+        r_matrix[[3, 2]] = omega_y_l.sinh() * (omega_y);
         r_matrix[[3, 3]] = omega_y_l.cosh();
     }
 

@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use std::error::Error;
+use std::f64::consts::PI;
 use std::fmt;
 use std::fs::File;
 use std::io::{BufReader, Read};
@@ -30,6 +31,14 @@ pub enum Statement<'a> {
     Element(&'a str, &'a str, HashMap<&'a str, &'a str>),
     Line(&'a str, Vec<&'a str>),
     Use(&'a str),
+}
+
+pub fn degrees_to_radians(degs: f64) -> f64 {
+    degs * PI / 180.0
+}
+
+pub fn radians_to_degrees(rads: f64) -> f64 {
+    rads * 180.0 / PI
 }
 
 fn evaluate_expr(expr: &str, vars: &HashMap<&str, f64>) -> Result<f64, EvalexprError> {
@@ -111,8 +120,10 @@ pub fn parse_lattice_from_tracy_file(file_path: &str) -> Result<Vec<crate::Eleme
                     let length = evaluate_expr(params.get("L").unwrap_or(&"0.0"), &vars).unwrap();
                     let b_2 = evaluate_expr(params.get("B_2").unwrap_or(&"0.0"), &vars).unwrap();
                     let angle = evaluate_expr(params.get("Phi").unwrap_or(&"0.0"), &vars).unwrap();
-                    element_dictionary
-                        .insert(name, make_sbend((*name).to_string(), length, angle, b_2));
+                    element_dictionary.insert(
+                        name,
+                        make_sbend((*name).to_string(), length, degrees_to_radians(angle), b_2),
+                    );
                 }
                 "Sextupole" => {
                     let length = evaluate_expr(params.get("L").unwrap_or(&"0.0"), &vars).unwrap();
