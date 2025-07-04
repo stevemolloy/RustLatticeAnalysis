@@ -1,4 +1,6 @@
 use std::collections::HashMap;
+use std::error::Error;
+use std::fmt;
 use std::fs::File;
 use std::io::{BufReader, Read};
 use std::process::exit;
@@ -10,6 +12,17 @@ use winnow::token::{take_till, take_while};
 use winnow::{Parser, Result};
 
 use crate::{make_cavity, make_drift, make_marker, make_oct, make_quad, make_sbend, make_sext};
+
+#[derive(Debug)]
+pub struct ParseError;
+
+impl Error for ParseError {}
+
+impl fmt::Display for ParseError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "Oh no, something bad went down")
+    }
+}
 
 #[derive(Debug, PartialEq)]
 pub enum Statement<'a> {
@@ -33,7 +46,7 @@ fn evaluate_expr(expr: &str, vars: &HashMap<&str, f64>) -> Result<f64, EvalexprE
     }
 }
 
-pub fn parse_lattice_from_tracy_file(file_path: &str) -> Result<Vec<crate::Element>, ()> {
+pub fn parse_lattice_from_tracy_file(file_path: &str) -> Result<Vec<crate::Element>, ParseError> {
     use Statement::*;
 
     let f = File::open(file_path).unwrap_or_else(|err| {
@@ -150,7 +163,7 @@ pub fn parse_lattice_from_tracy_file(file_path: &str) -> Result<Vec<crate::Eleme
                 println!("Found a USE statement with the name: {name}");
                 if !line_dictionary.contains_key(name) {
                     eprintln!("\tThis name does NOT exist in the dictionary");
-                    exit(1);
+                    return Err(ParseError);
                 } else {
                     let retval = line_dictionary.remove(name).unwrap(); // line_dictionary[name];
                     return Ok(retval);
@@ -158,7 +171,8 @@ pub fn parse_lattice_from_tracy_file(file_path: &str) -> Result<Vec<crate::Eleme
             }
         }
     }
-    unreachable!("Should never get here!");
+    eprintln!("ERROR: Input file does not contain a USE instruction");
+    Err(ParseError)
 }
 
 pub fn optional_whitespace<'a>(input: &mut &'a str) -> Result<&'a str> {
