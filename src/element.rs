@@ -29,28 +29,28 @@ impl Display for Element {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
         match element_type(self) {
             EleType::EleTypeMarker => {
-                write!(f, "Marker: {name}", name = self.name)
+                write!(f, "{name}: Marker", name = self.name)
             }
             EleType::EleTypeDrift => {
-                write!(f, "Drift: {name}", name = self.name)
+                write!(f, "{name}: Drift", name = self.name)
             }
             EleType::EleTypeBend => {
-                write!(f, "Bend: {name}", name = self.name)
+                write!(f, "{name}: Bend", name = self.name)
             }
             EleType::EleTypeQuad => {
-                write!(f, "Quad: {name}", name = self.name)
+                write!(f, "{name}: Quad", name = self.name)
             }
             EleType::EleTypeSext => {
-                write!(f, "Sext: {name}", name = self.name)
+                write!(f, "{name}: Sext", name = self.name)
             }
             EleType::EleTypeOct => {
-                write!(f, "Oct: {name}", name = self.name)
+                write!(f, "{name}: Oct", name = self.name)
             }
             EleType::EleTypeMult => {
-                write!(f, "Mult: {name}", name = self.name)
+                write!(f, "{name}: Mult", name = self.name)
             }
             EleType::EleTypeCav => {
-                write!(f, "RFCav: {name}", name = self.name)
+                write!(f, "{name}: RFCav", name = self.name)
             }
         }
     }
