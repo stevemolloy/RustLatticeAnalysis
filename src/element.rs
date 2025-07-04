@@ -290,6 +290,16 @@ pub fn get_line_matrix(line: &[Element]) -> Array2<f64> {
     retval
 }
 
+pub fn apply_matrix_n_times(matrix: &Array2<f64>, n: usize) -> Array2<f64> {
+    let mut result = Array2::eye(6);
+    
+    for _ in 0..n {
+        result = result.dot(matrix);
+    }
+
+    result
+}
+
 pub fn print_matrix(matrix: &Array2<f64>) {
     for row in matrix.outer_iter() {
         for item in row {
