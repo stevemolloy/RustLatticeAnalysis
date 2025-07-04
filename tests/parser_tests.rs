@@ -240,7 +240,7 @@ fn test_parse_lattice_from_tracy_file() {
 
     let total_angle_expected = 18.0;
     let total_length_expected = 26.4;
-    let total_angle_actual = get_bending_angle(&line);
+    let total_angle_actual = radians_to_degrees(get_bending_angle(&line));
     let total_length_actual = get_line_length(&line);
     assert!((total_length_actual - total_length_expected).abs() < 1e-3);
     assert!((total_angle_actual - total_angle_expected).abs() < 1e-3);
