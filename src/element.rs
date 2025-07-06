@@ -23,6 +23,7 @@ pub struct Element {
     pub _harmonic: f64,
     pub _lag: f64,
     pub r_matrix: Array2<f64>,
+    pub eta_prop_matrix: Array2<f64>,
 }
 
 impl Display for Element {
@@ -58,6 +59,8 @@ impl Display for Element {
 
 impl Default for Element {
     fn default() -> Self {
+        let r_matrix = Array2::<f64>::eye(6);
+
         Self {
             name: "".to_string(),
             length: 0.0,
@@ -66,7 +69,8 @@ impl Default for Element {
             _voltage: 0.0,
             _harmonic: 0.0,
             _lag: 0.0,
-            r_matrix: Array2::eye(6),
+            eta_prop_matrix: make_eta_prop_matrix(&r_matrix),
+            r_matrix,
         }
     }
 }
@@ -105,6 +109,7 @@ pub fn make_drift(name: String, length: f64) -> Element {
     Element {
         name,
         length,
+        eta_prop_matrix: make_eta_prop_matrix(&r_matrix),
         r_matrix,
         ..Default::default()
     }
@@ -124,6 +129,7 @@ pub fn make_cavity(
     Element {
         name,
         length,
+        eta_prop_matrix: make_eta_prop_matrix(&r_matrix),
         r_matrix,
         _frequency: freq,
         _harmonic: harmonic,
@@ -140,6 +146,7 @@ pub fn make_sext(name: String, length: f64, k2: f64) -> Element {
     Element {
         name,
         length,
+        eta_prop_matrix: make_eta_prop_matrix(&r_matrix),
         r_matrix,
         k: [0.0, 0.0, k2, 0.0],
         ..Default::default()
@@ -153,6 +160,7 @@ pub fn make_oct(name: String, length: f64, k3: f64) -> Element {
     Element {
         name,
         length,
+        eta_prop_matrix: make_eta_prop_matrix(&r_matrix),
         r_matrix,
         k: [0.0, 0.0, 0.0, k3],
         ..Default::default()
@@ -206,6 +214,7 @@ pub fn make_quad(name: String, length: f64, k1: f64) -> Element {
         name,
         length,
         k: [0.0, k1, 0.0, 0.0],
+        eta_prop_matrix: make_eta_prop_matrix(&r_matrix),
         r_matrix,
         ..Default::default()
     }
@@ -275,9 +284,28 @@ pub fn make_sbend(name: String, length: f64, angle: f64, k1: f64) -> Element {
         name,
         length,
         k: [angle, k1, 0.0, 0.0],
+        eta_prop_matrix: make_eta_prop_matrix(&r_matrix),
         r_matrix,
         ..Default::default()
     }
+}
+
+fn make_eta_prop_matrix(r_matrix: &Array2<f64>) -> Array2<f64> {
+    let mut retval: Array2<f64> = Array2::zeros((3, 3));
+
+    retval[[0, 0]] = r_matrix[[0, 0]];
+    retval[[0, 1]] = r_matrix[[0, 1]];
+    retval[[0, 1]] = r_matrix[[0, 5]];
+
+    retval[[1, 0]] = r_matrix[[1, 0]];
+    retval[[1, 1]] = r_matrix[[1, 1]];
+    retval[[1, 1]] = r_matrix[[1, 5]];
+
+    retval[[2, 0]] = 0.0;
+    retval[[2, 1]] = 0.0;
+    retval[[2, 1]] = 1.0;
+
+    retval
 }
 
 pub fn get_line_matrix(line: &[Element]) -> Array2<f64> {
