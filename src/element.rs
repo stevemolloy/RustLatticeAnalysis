@@ -303,10 +303,25 @@ pub fn apply_matrix_n_times(matrix: &Array2<f64>, n: usize) -> Array2<f64> {
 pub fn print_matrix(matrix: &Array2<f64>) {
     for row in matrix.outer_iter() {
         for item in row {
-            print!("  {item:+0.6e}");
+            print!(" {} ", fmt_f64(*item, 10, 6, 2));
         }
         println!();
     }
+}
+
+fn fmt_f64(num: f64, width: usize, precision: usize, exp_pad: usize) -> String {
+    let mut num = format!("{:+.precision$e}", num, precision = precision);
+    // Safe to `unwrap` as `num` is guaranteed to contain `'e'`
+    let exp = num.split_off(num.find('e').unwrap());
+
+    let (sign, exp) = if exp.starts_with("e-") {
+        ('-', &exp[2..])
+    } else {
+        ('+', &exp[1..])
+    };
+    num.push_str(&format!("e{}{:0>pad$}", sign, exp, pad = exp_pad));
+
+    format!("{:>width$}", num, width = width)
 }
 
 pub fn get_bending_angle(line: &[Element]) -> f64 {
