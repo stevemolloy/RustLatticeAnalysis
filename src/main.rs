@@ -1,3 +1,4 @@
+use ndarray::{Array2, arr1};
 use rust_lattice_analysis::*;
 
 fn main() {
@@ -17,6 +18,38 @@ fn main() {
 
     let line_len = get_line_length(&line);
     let line_angle = radians_to_degrees(get_bending_angle(&line));
+    let line_matrix = get_line_matrix(&line);
+    let total_matrix = apply_matrix_n_times(&line_matrix, periodicity);
+
+    let r11 = line_matrix[[0, 0]];
+    let r12 = line_matrix[[0, 1]];
+    let r22 = line_matrix[[1, 1]];
+    let r33 = line_matrix[[2, 2]];
+    let r34 = line_matrix[[2, 3]];
+    let r44 = line_matrix[[3, 3]];
+
+    let phi_x = ((r11 + r22) / 2.0).acos();
+    let phi_y = ((r33 + r44) / 2.0).acos();
+    let beta_x = (r12 / phi_x.sin()).abs();
+    let beta_y = (r34 / phi_y.sin()).abs();
+
+    let mut twiss_mat = Array2::<f64>::from_diag(&arr1(&[
+        beta_x,
+        1.0 / beta_x,
+        beta_y,
+        1.0 / beta_y,
+        0.0,
+        0.0,
+    ]));
+
+    let mut beta_x_vec: Vec<f64> = vec![];
+    let mut beta_y_vec: Vec<f64> = vec![];
+    for ele in line.iter() {
+        beta_x_vec.push(twiss_mat[[0,0]]);
+        beta_y_vec.push(twiss_mat[[2,2]]);
+        twiss_mat = ele.r_matrix.dot(&twiss_mat.dot(&ele.r_matrix.t()));
+    }
+
     println!();
     println!("Summary of the lattice defined in {file_path}");
     println!();
@@ -31,14 +64,14 @@ fn main() {
         tot_angle = line_angle * periodicity as f64
     );
     println!();
-
-    let line_matrix = get_line_matrix(&line);
     println!("Total matrix, R, for the line is:");
     print_matrix(&line_matrix);
     println!();
-
-    let total_matrix = apply_matrix_n_times(&line_matrix, periodicity);
     println!("Total matrix, R, for the full system:");
     print_matrix(&total_matrix);
     println!();
+
+    for (bx, by) in beta_x_vec.iter().zip(beta_y_vec) {
+        println!("{}, {}", bx, by);
+    }
 }
