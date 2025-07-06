@@ -295,15 +295,15 @@ fn make_eta_prop_matrix(r_matrix: &Array2<f64>) -> Array2<f64> {
 
     retval[[0, 0]] = r_matrix[[0, 0]];
     retval[[0, 1]] = r_matrix[[0, 1]];
-    retval[[0, 1]] = r_matrix[[0, 5]];
+    retval[[0, 2]] = r_matrix[[0, 5]];
 
     retval[[1, 0]] = r_matrix[[1, 0]];
     retval[[1, 1]] = r_matrix[[1, 1]];
-    retval[[1, 1]] = r_matrix[[1, 5]];
+    retval[[1, 2]] = r_matrix[[1, 5]];
 
     retval[[2, 0]] = 0.0;
     retval[[2, 1]] = 0.0;
-    retval[[2, 1]] = 1.0;
+    retval[[2, 2]] = 1.0;
 
     retval
 }
