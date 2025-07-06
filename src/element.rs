@@ -310,6 +310,20 @@ pub fn print_matrix(matrix: &Array2<f64>) {
 }
 
 fn fmt_f64(num: f64, width: usize, precision: usize, exp_pad: usize) -> String {
+    if num.is_nan() {
+        return format!("{:>width$}", "NaN", width = width);
+    }
+    if num.is_infinite() {
+        return format!(
+            "{:>width$}",
+            if num.is_sign_negative() {
+                "-inf"
+            } else {
+                "+inf"
+            },
+            width = width
+        );
+    }
     let mut num = format!("{:+.precision$e}", num, precision = precision);
     // Safe to `unwrap` as `num` is guaranteed to contain `'e'`
     let exp = num.split_off(num.find('e').unwrap());
