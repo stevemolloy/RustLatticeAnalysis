@@ -1,3 +1,4 @@
+use core::f64;
 use ndarray::Array2;
 use std::fmt::{Display, Error, Formatter};
 
@@ -71,6 +72,16 @@ impl Default for Element {
             _lag: 0.0,
             eta_prop_matrix: make_eta_prop_matrix(&r_matrix),
             r_matrix,
+        }
+    }
+}
+
+impl Element {
+    pub fn bending_radius(&self) -> f64 {
+        if self.k[0] == 0.0 {
+            f64::INFINITY
+        } else {
+            self.length / self.k[0]
         }
     }
 }
@@ -372,4 +383,15 @@ pub fn get_bending_angle(line: &[Element]) -> f64 {
 
 pub fn get_line_length(line: &[Element]) -> f64 {
     line.iter().fold(0.0, |acc, x| acc + x.length)
+}
+
+pub fn synch_rad_integral_2(line: &[Element]) -> f64 {
+    line.iter()
+        .fold(0.0, |acc, x| acc + x.length / x.bending_radius().powi(2))
+}
+
+pub fn synch_rad_integral_3(line: &[Element]) -> f64 {
+    line.iter().fold(0.0, |acc, x| {
+        acc + x.length / x.bending_radius().abs().powi(3)
+    })
 }

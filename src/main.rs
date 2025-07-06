@@ -1,6 +1,6 @@
-use ndarray::{arr1, Array1, Array2};
+// use itertools::izip;
+use ndarray::{Array1, Array2, arr1};
 use rust_lattice_analysis::*;
-use itertools::izip;
 
 fn main() {
     let periodicity = 20;
@@ -29,6 +29,7 @@ fn main() {
     let r34 = line_matrix[[2, 3]];
     let r44 = line_matrix[[3, 3]];
     let r16 = line_matrix[[0, 5]];
+    let r56 = line_matrix[[4, 5]];
 
     let eta_x = r16 / (1.0 - r11);
     let phi_x = ((r11 + r22) / 2.0).acos();
@@ -49,18 +50,26 @@ fn main() {
 
     let mut beta_x_vec: Vec<f64> = vec![];
     let mut beta_y_vec: Vec<f64> = vec![];
-    let mut eta_x_vec: Vec<f64>  = vec![];
+    let mut eta_x_vec: Vec<f64> = vec![];
     for ele in line.iter() {
-        beta_x_vec.push(twiss_mat[[0,0]]);
-        beta_y_vec.push(twiss_mat[[2,2]]);
+        beta_x_vec.push(twiss_mat[[0, 0]]);
+        beta_y_vec.push(twiss_mat[[2, 2]]);
         eta_x_vec.push(eta_vec[[0]]);
 
         twiss_mat = ele.r_matrix.dot(&twiss_mat.dot(&ele.r_matrix.t()));
         eta_vec = ele.eta_prop_matrix.dot(&eta_vec);
     }
-    beta_x_vec.push(twiss_mat[[0,0]]);
-    beta_y_vec.push(twiss_mat[[2,2]]);
+    beta_x_vec.push(twiss_mat[[0, 0]]);
+    beta_y_vec.push(twiss_mat[[2, 2]]);
     eta_x_vec.push(eta_vec[[0]]);
+
+    let synch_integrals: [f64; 5] = [
+        r56,
+        synch_rad_integral_2(&line),
+        synch_rad_integral_3(&line),
+        0.0,
+        0.0,
+    ];
 
     println!();
     println!("Summary of the lattice defined in {file_path}");
@@ -83,7 +92,23 @@ fn main() {
     print_matrix(&total_matrix);
     println!();
 
-    for (bx, by, ex) in izip!(beta_x_vec, beta_y_vec, eta_x_vec) {
-        println!("{}, {}, {}", bx, by, ex);
-    }
+    println!("Synchrotron radiation integrals:");
+    println!(
+        "\tI_1 = {:+0.3e} ({:+0.3e} for the line)",
+        periodicity as f64 * synch_integrals[0],
+        synch_integrals[0]
+    );
+    println!(
+        "\tI_2 = {:+0.3e} ({:+0.3e} for the line)",
+        periodicity as f64 * synch_integrals[1],
+        synch_integrals[1]
+    );
+    println!(
+        "\tI_3 = {:+0.3e} ({:+0.3e} for the line)",
+        periodicity as f64 * synch_integrals[2],
+        synch_integrals[2]
+    );
+    // for (bx, by, ex) in izip!(beta_x_vec, beta_y_vec, eta_x_vec) {
+    //     println!("{}, {}, {}", bx, by, ex);
+    // }
 }
