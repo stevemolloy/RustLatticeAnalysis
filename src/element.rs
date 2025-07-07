@@ -2,6 +2,9 @@ use core::f64;
 use ndarray::Array2;
 use std::fmt::{Display, Error, Formatter};
 
+const ERADIUS_TIMES_RESTMASS: f64 = 0.959976365e-9;
+const C_Q: f64 = 3.83193864121903e-13;
+
 #[derive(Debug)]
 pub enum EleType {
     EleTypeMarker,
@@ -394,4 +397,60 @@ pub fn synch_rad_integral_3(line: &[Element]) -> f64 {
     line.iter().fold(0.0, |acc, x| {
         acc + x.length / x.bending_radius().abs().powi(3)
     })
+}
+
+pub fn get_curly_h(ele: &Element, eta0: f64, etap0: f64, beta0: f64, alpha0: f64) -> f64 {
+    let gamma0 = (1.0 / beta0) * (1.0 + alpha0 * alpha0);
+
+    if ele.k[0] == 0.0 || ele.length == 0.0 {
+        return gamma0 * eta0 * eta0 + 2.0 * alpha0 * eta0 * etap0 + beta0 * etap0 * etap0;
+    }
+
+    let k1 = ele.k[1];
+    let l = ele.length;
+    let angle = ele.k[0];
+    let h = (angle / l).abs();
+    let cube_h = h.powi(3);
+
+    let k_sqr = h.powi(2) + k1;
+    let k = k_sqr.abs().sqrt();
+
+    let big_k = k_sqr.abs();
+    let psi = k * l;
+
+    let i_5 = if k_sqr > 0.0 {
+        l * cube_h.abs()
+            * (gamma0 * eta0.powi(2) + 2e0 * alpha0 * eta0 * etap0 + beta0 * etap0.powi(2))
+            - 2e0 * h.powi(4) / (big_k.powf(3e0 / 2e0))
+                * (big_k.sqrt() * (alpha0 * eta0 + beta0 * etap0) * (psi.cos() - 1e0)
+                    + (gamma0 * eta0 + alpha0 * etap0) * (psi - psi.sin()))
+            + h.powi(5).abs() / (4e0 * big_k.powf(5e0 / 2e0))
+                * (2e0 * alpha0 * big_k.sqrt() * (4e0 * psi.cos() - (2e0 * psi).cos() - 3e0)
+                    + beta0 * big_k * (2e0 * psi - (2e0 * psi).sin())
+                    + gamma0 * (6e0 * psi - 8e0 * psi.sin() + (2e0 * psi).sin()))
+    } else {
+        l * h.powi(3).abs()
+            * (gamma0 * eta0.powi(2) + 2e0 * alpha0 * eta0 * etap0 + beta0 * etap0.powi(2))
+            + 2e0 * h.powi(4) / (big_k.powf(3e0 / 2e0))
+                * (big_k.sqrt() * (alpha0 * eta0 + beta0 * etap0) * (psi.cosh() - 1e0)
+                    + (gamma0 * eta0 + alpha0 * etap0) * (psi - psi.sinh()))
+            + h.powi(5).abs() / (4e0 * big_k.powf(5e0 / 2e0))
+                * (2e0 * alpha0 * big_k.sqrt() * (4e0 * psi.cosh() - (2e0 * psi).cosh() - 3e0)
+                    - beta0 * big_k * (2e0 * psi - (2e0 * psi).sinh())
+                    + gamma0 * (6e0 * psi - 8e0 * psi.sinh() + (2e0 * psi).sinh()))
+    };
+
+    i_5 / (l * cube_h.abs())
+}
+
+pub fn e_loss_per_turn(i_2: f64, gamma0: f64) -> f64 {
+    ERADIUS_TIMES_RESTMASS * i_2 * gamma0.powi(4)
+}
+
+pub fn natural_emittance_x(i_2: f64, i_4: f64, i_5: f64, gamma0: f64) -> f64 {
+    C_Q * gamma0.powi(2) * i_5 / (i_2 - i_4)
+}
+
+pub fn energy_spread(i_2: f64, i_3: f64, i_4: f64, gamma0: f64) -> f64 {
+    C_Q * gamma0.powi(2) * i_3 / (2.0 * i_2 + i_4)
 }
