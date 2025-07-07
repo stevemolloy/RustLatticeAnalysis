@@ -8,8 +8,7 @@ use std::process::exit;
 
 use evalexpr::*;
 use winnow::combinator::{alt, delimited, opt, separated};
-use winnow::token::literal;
-use winnow::token::{take_till, take_while};
+use winnow::token::{literal, take_till, take_while};
 use winnow::{Parser, Result};
 
 use crate::{make_cavity, make_drift, make_marker, make_oct, make_quad, make_sbend, make_sext};
