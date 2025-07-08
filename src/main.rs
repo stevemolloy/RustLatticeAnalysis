@@ -14,16 +14,6 @@ fn main() {
     let file_path = "lattices/max_4u_sp_jb_5.lat";
     let line = parse_lattice_from_tracy_file(file_path).unwrap();
 
-    // for (i, ele) in line.iter().enumerate() {
-    //     println!(
-    //         "{index}: {ele}: L = {len:0.6}",
-    //         index = i + 1,
-    //         len = ele.length
-    //     );
-    //     print_matrix(&ele.r_matrix);
-    //     println!();
-    // }
-
     let line_len = get_line_length(&line);
     let line_angle = radians_to_degrees(get_bending_angle(&line));
     let line_matrix = get_line_matrix(&line);
