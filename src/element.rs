@@ -452,5 +452,5 @@ pub fn natural_emittance_x(i_2: f64, i_4: f64, i_5: f64, gamma0: f64) -> f64 {
 }
 
 pub fn energy_spread(i_2: f64, i_3: f64, i_4: f64, gamma0: f64) -> f64 {
-    C_Q * gamma0.powi(2) * i_3 / (2.0 * i_2 + i_4)
+    (C_Q * gamma0.powi(2) * i_3 / (2.0 * i_2 + i_4)).sqrt()
 }
