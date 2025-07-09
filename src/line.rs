@@ -111,7 +111,7 @@ impl Line {
 
         let j_x = 1.0 - synch_integrals[3] / synch_integrals[1];
         let t_0 = (line_length * periodicity as f64) / C;
-        let tau_x = 1e3 * 2.0 * energy * t_0
+        let tau_x = 2.0 * energy * t_0
             / (j_x
                 * e_loss_per_turn(
                     periodicity as f64 * synch_integrals[1],

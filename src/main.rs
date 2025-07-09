@@ -63,7 +63,7 @@ fn main() {
     );
     println!("Momentum compaction:  {:+0.3e}", line.mom_compact);
     println!("j_x:                  {:+0.3e}", line.j_x);
-    println!("tau_x:                {:0.3} ms", line.tau_x);
+    println!("tau_x:                {:0.3} ms", 1e3 * line.tau_x);
     println!(
         "Natural x emittance:  {:0.3} pm.rad",
         1e12 * line.nat_emitt_x
