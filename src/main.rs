@@ -55,8 +55,8 @@ fn main() {
     );
 
     println!();
-    println!("x fractional tune:    {}", line.x_frac_tune);
-    println!("y fractional tune:    {}", line.y_frac_tune);
+    println!("x fractional tune:    {:0.3}", line.x_frac_tune);
+    println!("y fractional tune:    {:0.3}", line.y_frac_tune);
     println!(
         "Energy loss per turn: {:0.3} keV",
         line.e_loss_per_turn / 1e3
