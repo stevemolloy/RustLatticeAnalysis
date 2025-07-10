@@ -39,8 +39,8 @@ impl Line {
         let line_angle = radians_to_degrees(get_bending_angle(&line));
         let total_angle = line_angle * periodicity as f64;
 
-        let phi_x = ((line_matrix[[0, 0]] + line_matrix[[1, 1]]) / 2.0).acos();
-        let phi_y = ((line_matrix[[2, 2]] + line_matrix[[3, 3]]) / 2.0).acos();
+        let phi_x = ((total_matrix[[0, 0]] + total_matrix[[1, 1]]) / 2.0).acos();
+        let phi_y = ((total_matrix[[2, 2]] + total_matrix[[3, 3]]) / 2.0).acos();
         let beta_x = (line_matrix[[0, 1]] / phi_x.sin()).abs();
         let beta_y = (line_matrix[[2, 3]] / phi_y.sin()).abs();
         let eta_x = line_matrix[[0, 5]] / (1.0 - line_matrix[[0, 0]]);
