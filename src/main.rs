@@ -16,8 +16,8 @@ fn main() {
         line.total_length, line.line_length
     );
     println!(
-        "Total bending angle of the lattice {:0.3} deg ({:0.3} deg for the line)",
-        line.line_angle, line.total_angle
+        "Total bending angle of the lattice: {:0.3} deg ({:0.3} deg for the line)",
+        line.total_angle, line.line_angle
     );
     println!();
     println!("Total matrix, R, for the line is:");
@@ -29,40 +29,40 @@ fn main() {
 
     println!("Synchrotron radiation integrals:");
     println!(
-        "\tI_1 = {:+0.3e} ({:+0.3e} for the line)",
+        "\tI_1 = {:+0.6e} ({:+0.6e} for the line)",
         line.periodicity as f64 * line.synch_integrals[0],
         line.synch_integrals[0]
     );
     println!(
-        "\tI_2 = {:+0.3e} ({:+0.3e} for the line)",
+        "\tI_2 = {:+0.6e} ({:+0.6e} for the line)",
         line.periodicity as f64 * line.synch_integrals[1],
         line.synch_integrals[1]
     );
     println!(
-        "\tI_3 = {:+0.3e} ({:+0.3e} for the line)",
+        "\tI_3 = {:+0.6e} ({:+0.6e} for the line)",
         line.periodicity as f64 * line.synch_integrals[2],
         line.synch_integrals[2]
     );
     println!(
-        "\tI_4 = {:+0.3e} ({:+0.3e} for the line)",
+        "\tI_4 = {:+0.6e} ({:+0.6e} for the line)",
         line.periodicity as f64 * line.synch_integrals[3],
         line.synch_integrals[3]
     );
     println!(
-        "\tI_5 = {:+0.3e} ({:+0.3e} for the line)",
+        "\tI_5 = {:+0.6e} ({:+0.6e} for the line)",
         line.periodicity as f64 * line.synch_integrals[4],
         line.synch_integrals[4]
     );
 
     println!();
-    println!("x fractional tune:    {:0.3}", line.x_frac_tune);
-    println!("y fractional tune:    {:0.3}", line.y_frac_tune);
+    println!("x fractional tune:    {:0.6}", line.x_frac_tune);
+    println!("y fractional tune:    {:0.6}", line.y_frac_tune);
     println!(
         "Energy loss per turn: {:0.3} keV",
         line.e_loss_per_turn / 1e3
     );
-    println!("Momentum compaction:  {:+0.3e}", line.mom_compact);
-    println!("j_x:                  {:+0.3e}", line.j_x);
+    println!("Momentum compaction:  {:0.3e}", line.mom_compact);
+    println!("j_x:                  {:0.3e}", line.j_x);
     println!("tau_x:                {:0.3} ms", 1e3 * line.tau_x);
     println!(
         "Natural x emittance:  {:0.3} pm.rad",
