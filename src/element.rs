@@ -344,8 +344,11 @@ pub fn apply_matrix_n_times(matrix: &Array2<f64>, n: usize) -> Array2<f64> {
 
 pub fn print_matrix(matrix: &Array2<f64>) {
     for row in matrix.outer_iter() {
-        for item in row {
-            print!(" {} ", fmt_f64(*item, 10, 6, 2));
+        for (i, item) in row.iter().enumerate() {
+            print!(" {}", fmt_f64(*item, 10, 6, 2));
+            if i != 5 {
+                print!(" ");
+            }
         }
         println!();
     }
